@@ -4,6 +4,7 @@ import com.google.api.client.auth.oauth2.AuthorizationCodeFlow;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.servlet.auth.oauth2.AbstractAuthorizationCodeServlet;
 import com.google.api.client.http.GenericUrl;
+import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.CalendarList;
 import com.google.api.services.calendar.model.CalendarListEntry;
@@ -16,7 +17,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -95,11 +98,18 @@ public class CalendarServlet extends AbstractAuthorizationCodeServlet {
         // Iterate over the events in the specified calendar
         String pageToken = null;
         List<Event> eventsList = new ArrayList<Event>();
+        Date today = new Date();
+        Date twoWeeksAfter = DateUtils.add(today, 14);
+        DateTime minDateTime = new DateTime(today, TimeZone.getDefault());
+        DateTime maxDateTime = new DateTime(twoWeeksAfter, TimeZone.getDefault());
+
         for (CalendarListEntry calendarListEntry : calendarListEntries) {
             do {
-                Events events = service.events().list(calendarListEntry.getId()).setPageToken(pageToken).execute();
+                Events events = service.events().list(calendarListEntry.getId())
+                        .setTimeMin(minDateTime)
+                        .setTimeMax(maxDateTime)
+                        .setPageToken(pageToken).execute();
                 eventsList.addAll(events.getItems());
-
                 pageToken = events.getNextPageToken();
             } while (pageToken != null);
         }
