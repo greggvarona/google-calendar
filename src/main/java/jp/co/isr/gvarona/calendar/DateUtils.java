@@ -1,5 +1,6 @@
 package jp.co.isr.gvarona.calendar;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -14,6 +15,11 @@ public class DateUtils {
         calendar.add(Calendar.DAY_OF_YEAR, noOfDays);
         Date result = calendar.getTime();
         return result;
+    }
+
+    public static String format(Date date, String format) {
+        SimpleDateFormat formatter = new SimpleDateFormat(format);
+        return formatter.format(date);
     }
 
     /*

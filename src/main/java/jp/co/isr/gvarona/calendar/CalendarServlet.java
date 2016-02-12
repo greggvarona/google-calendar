@@ -16,13 +16,12 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.TimeZone;
-import java.util.logging.Level;
+import java.util.*;
 import java.util.logging.Logger;
 
+/**
+ * Redirects to the calendar view when authorization and consent is granted.
+ */
 public class CalendarServlet extends AbstractAuthorizationCodeServlet {
 
     private Logger logger = Logger.getLogger(CalendarServlet.class.toString());
@@ -30,22 +29,13 @@ public class CalendarServlet extends AbstractAuthorizationCodeServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
-        List<Event> events = null;
-        Credential creds = getCredential();
-        Calendar service = new Calendar.Builder(AuthHelper.HTTP_TRANSPORT, AuthHelper.JSON_FACTORY, creds)
-                .setApplicationName(AuthHelper.APPLICATION_NAME).build();
-        String[] selectedCalendars = request.getParameterValues("selectedCalendars");
-        if (selectedCalendars != null && selectedCalendars.length > 0) {
-            logger.log(Level.INFO, "Processing selected calendars.");
-            events = this.getCalendarEventsBySelectedIds(service, selectedCalendars);
-        } else {
-            logger.log(Level.INFO, "Displaying all events in all calendars.");
-            List<CalendarListEntry> entries = this.getCalendarListEntries(service);
-            events = this.getCalendarEvents(service, entries);
-        }
-        logger.log(Level.INFO, (events == null) ? "no events here :(" : "events.size " + events.size());
-        request.setAttribute("events", events);
-        request.getRequestDispatcher("calendar.jsp").forward(request, response);
+        doRequest(request, response);
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws IOException, ServletException {
+        doRequest(request, response);
     }
 
     @Override
@@ -66,7 +56,31 @@ public class CalendarServlet extends AbstractAuthorizationCodeServlet {
         return "";
     }
 
-    private List<CalendarListEntry> getCalendarListEntries(Calendar service) throws IOException {
+    protected void doRequest(HttpServletRequest request, HttpServletResponse response)
+            throws IOException, ServletException {
+        /*List<Event> events = null;
+        Credential creds = getCredential();
+        Calendar service = new Calendar.Builder(AuthHelper.HTTP_TRANSPORT, AuthHelper.JSON_FACTORY, creds)
+                .setApplicationName(AuthHelper.APPLICATION_NAME).build();
+        String[] selectedCalendarIds = request.getParameterValues("selectedCalendarIds");
+        List<CalendarListEntry> entries = this.getCalendarListEntries(service);
+        Date today = new Date();
+        if (selectedCalendarIds != null && selectedCalendarIds.length > 0) {
+            logger.log(Level.INFO, "Processing selected calendars.");
+            events = this.getCalendarEventsByIds(service, selectedCalendarIds, today);
+            this.setSelectedCalendars(entries, selectedCalendarIds);
+        } else {
+            logger.log(Level.INFO, "Displaying all events in all calendars.");
+            events = this.getCalendarEvents(service, entries, today);
+        }
+        request.setAttribute("defaultDate", DateUtils.format(today, "yyyy-MM-dd"));
+        request.setAttribute("events", events);
+        request.setAttribute("calendars", entries);
+        request.setAttribute("selectedCalendarIds", selectedCalendarIds);*/
+        request.getRequestDispatcher("calendar.jsp").forward(request, response);
+    }
+
+    protected List<CalendarListEntry> getCalendarListEntries(Calendar service) throws IOException {
         List<CalendarListEntry> items = new ArrayList<CalendarListEntry>();
         // Iterate through entries in calendar list
         String pageToken = null;
@@ -78,14 +92,21 @@ public class CalendarServlet extends AbstractAuthorizationCodeServlet {
         return items;
     }
 
-    private List<Event> getCalendarEventsBySelectedIds(Calendar service, String[] selectedCalendarIds)
+    protected List<Event> getCalendarEventsByIds(Calendar service, String[] selectedCalendarIds, Date start)
             throws IOException {
         // Iterate over the events in the specified calendar
         String pageToken = null;
         List<Event> eventsList = new ArrayList<Event>();
+        Date today = start;
+        Date twoWeeksAfter = DateUtils.add(today, 14);
+        DateTime minDateTime = new DateTime(today, TimeZone.getDefault());
+        DateTime maxDateTime = new DateTime(twoWeeksAfter, TimeZone.getDefault());
         for (String calendarId : selectedCalendarIds) {
             do {
-                Events events = service.events().list(calendarId).setPageToken(pageToken).execute();
+                Events events = service.events().list(calendarId)
+                        .setTimeMin(minDateTime)
+                        .setTimeMax(maxDateTime)
+                        .setPageToken(pageToken).execute();
                 eventsList.addAll(events.getItems());
 
                 pageToken = events.getNextPageToken();
@@ -94,25 +115,24 @@ public class CalendarServlet extends AbstractAuthorizationCodeServlet {
         return eventsList;
     }
 
-    private List<Event> getCalendarEvents(Calendar service, List<CalendarListEntry> calendarListEntries) throws IOException {
+    protected List<Event> getCalendarEvents(Calendar service, List<CalendarListEntry> calendarListEntries, Date start)
+            throws IOException {
         // Iterate over the events in the specified calendar
-        String pageToken = null;
-        List<Event> eventsList = new ArrayList<Event>();
-        Date today = new Date();
-        Date twoWeeksAfter = DateUtils.add(today, 14);
-        DateTime minDateTime = new DateTime(today, TimeZone.getDefault());
-        DateTime maxDateTime = new DateTime(twoWeeksAfter, TimeZone.getDefault());
-
+        List<String> ids = new ArrayList<String>();
         for (CalendarListEntry calendarListEntry : calendarListEntries) {
-            do {
-                Events events = service.events().list(calendarListEntry.getId())
-                        .setTimeMin(minDateTime)
-                        .setTimeMax(maxDateTime)
-                        .setPageToken(pageToken).execute();
-                eventsList.addAll(events.getItems());
-                pageToken = events.getNextPageToken();
-            } while (pageToken != null);
+            ids.add(calendarListEntry.getId());
         }
-        return eventsList;
+        return getCalendarEventsByIds(service, ids.toArray(new String[0]), start);
+    }
+
+    protected void setSelectedCalendars(List<CalendarListEntry> entries, String[] calendarIds) {
+        List<String> calIds = Arrays.asList(calendarIds);
+
+        for(CalendarListEntry entry : entries) {
+            entry.setSelected(false);
+            if(calIds.contains(entry.getId())) {
+                entry.setSelected(true);
+            }
+        }
     }
 }

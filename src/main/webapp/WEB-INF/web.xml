@@ -17,6 +17,16 @@
     </servlet-mapping>
 
     <servlet>
+        <servlet-name>CalendarAjaxServlet</servlet-name>
+        <servlet-class>jp.co.isr.gvarona.calendar.CalendarAjaxServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>CalendarAjaxServlet</servlet-name>
+        <url-pattern>/calendar-ajax</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
         <servlet-name>CalendarServletCallback</servlet-name>
         <servlet-class>jp.co.isr.gvarona.auth.AuthServletCallback</servlet-class>
     </servlet>
