@@ -13,15 +13,12 @@ public class CalendarJson {
 
     private String defaultDate;
     private List<Event> events;
-    private String[] selectedCalendarIds;
     private List<CalendarListEntry> calendars;
     private transient Gson gson;
 
-    public CalendarJson(String defaultDate, List<Event> events, String[] selectedCalendarIds,
-                        List<CalendarListEntry> calendars) {
+    public CalendarJson(String defaultDate, List<Event> events, List<CalendarListEntry> calendars) {
         this.defaultDate = defaultDate;
         this.events = events;
-        this.selectedCalendarIds = selectedCalendarIds;
         this.calendars = calendars;
         gson = new Gson();
     }
@@ -40,14 +37,6 @@ public class CalendarJson {
 
     public void setEvents(List<Event> events) {
         this.events = events;
-    }
-
-    public String[] getSelectedCalendarIds() {
-        return selectedCalendarIds;
-    }
-
-    public void setSelectedCalendarIds(String[] selectedCalendarIds) {
-        this.selectedCalendarIds = selectedCalendarIds;
     }
 
     public List<CalendarListEntry> getCalendars() {

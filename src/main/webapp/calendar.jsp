@@ -11,6 +11,7 @@
 <html>
 <head>
   <title>Calendar Web Application</title>
+  <meta charset="UTF-8"/>
   <link rel='stylesheet' href='${pageContext.request.contextPath}/assets/fullcalendar-2.6.0/fullcalendar.css' />
   <link rel='stylesheet' href='${pageContext.request.contextPath}/assets/bootstrap-3.1.1/bootstrap.min.css' />
   <script src='${pageContext.request.contextPath}/assets/fullcalendar-2.6.0/lib/jquery.min.js'></script>
@@ -22,23 +23,41 @@
 </head>
 <body>
   <section class="container">
-    <div class="col-md-12">
+    <div class="col-lg-12 col-md-12">
       <h1>Calendar Web Application</h1>
     </div>
-    <div class="col-md-4 col-xs-12">
+    <div class="col-lg-4 col-md-4 col-xs-12">
       <div class="panel panel-default">
         <div class="panel-heading">
-          <h2 class="panel-title">calendar seleciton</h2>
+          <h2 class="panel-title">Calendar seleciton</h2>
         </div>
         <div class="panel-body">
           <form id="calendar-selection">
-
             <button id="calendar-selection-btn" class="btn btn-default">Update Calendar</button>
           </form>
         </div>
       </div>
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h2 class="panel-title">Forward to a friend</h2>
+        </div>
+        <div class="panel-body">
+          <div class="row">
+            <div id="recepients" class="col-lg-12 col-md-12">
+              <div class="input-group">
+                <input type="email" name="recepient" class="form-control" placeholder="Email address">
+                <span class="input-group-btn">
+                  <button class="btn btn-default remove-recepient" type="button">x</button>
+                </span>
+              </div><!-- /input-group -->
+              <button id="add-recepient" class="btn btn-default">Add a recepient</button>
+              <button id="send" class="btn btn-default">Send</button>
+            </div><!-- /.col-lg-6 -->
+          </div><!-- /.row -->
+        </div>
+      </div>
     </div>
-    <div id='calendar' class="col-md-8 col-xs-12"></div>
+    <div id='calendar' class="col-lg-8 col-md-8 col-xs-12"></div>
   </section>
 
   <script src='${pageContext.request.contextPath}/assets/app.js'></script>
