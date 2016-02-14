@@ -28,7 +28,7 @@
       <h1>Calendar Web Application</h1>
     </div>
     <div class="col-lg-4 col-md-4 col-xs-12">
-      <div class="panel panel-default">
+      <div class="panel panel-default calendars">
         <div class="panel-heading">
           <h2 class="panel-title">Calendar seleciton</h2>
         </div>
@@ -36,6 +36,8 @@
           <form id="calendar-selection" method="PUT" action="${pageContext.request.contextPath}/calendar">
             <button id="calendar-selection-btn" class="btn btn-default">Update Calendar</button>
           </form>
+        </div>
+        <div class="panel-footer">
         </div>
       </div>
       <div class="panel panel-default">

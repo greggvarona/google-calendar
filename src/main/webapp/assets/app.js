@@ -136,13 +136,15 @@
             data: $("#calendar-selection").serializeArray(),
             method: 'post',
             beforeSend: function() {
-
+                $(".calendars .panel-footer").html('Please wait while the calendar is being updated.');
             },
             success: function(doc) {
                 $('#calendar').fullCalendar('refetchEvents');
+                $(".calendars .panel-footer").html('');
             },
             error: function() {
                 alert("An error was encountered while fetching your calendar data.");
+                $(".calendars .panel-footer").html('');
             }
         });
     });
