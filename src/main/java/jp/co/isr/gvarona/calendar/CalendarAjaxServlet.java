@@ -24,6 +24,8 @@ public class CalendarAjaxServlet extends CalendarServlet {
 
     private Logger logger = Logger.getLogger(CalendarAjaxServlet.class.toString());
 
+    private CalendarServiceHelper calendarServiceHelper = new CalendarServiceHelper();
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
@@ -31,11 +33,11 @@ public class CalendarAjaxServlet extends CalendarServlet {
         Credential creds = getCredential();
         Calendar service = new Calendar.Builder(AuthHelper.HTTP_TRANSPORT, AuthHelper.JSON_FACTORY, creds)
                 .setApplicationName(AuthHelper.APPLICATION_NAME).build();
-        List<CalendarListEntry> entries = this.getCalendarListEntries(service);
+        List<CalendarListEntry> entries = calendarServiceHelper.getCalendarListEntries(service);
         Date today = new Date();
 
         logger.log(Level.INFO, "Processing all events in all calendars.");
-        events = this.getCalendarEvents(service, entries, today);
+        events = calendarServiceHelper.getCalendarEvents(service, entries, today);
 
         renderJson(response, today, events, entries);
     }
@@ -48,12 +50,12 @@ public class CalendarAjaxServlet extends CalendarServlet {
         Calendar service = new Calendar.Builder(AuthHelper.HTTP_TRANSPORT, AuthHelper.JSON_FACTORY, creds)
                 .setApplicationName(AuthHelper.APPLICATION_NAME).build();
         String[] selectedCalendarIds = request.getParameterValues("selectedCalendarIds");
-        List<CalendarListEntry> entries = this.getCalendarListEntries(service);
+        List<CalendarListEntry> entries = calendarServiceHelper.getCalendarListEntries(service);
         Date today = new Date();
         if (selectedCalendarIds != null && selectedCalendarIds.length > 0) {
             logger.log(Level.INFO, "Processing events for selected calendars.");
-            events = this.getCalendarEventsByIds(service, selectedCalendarIds, today);
-            this.setSelectedCalendars(service, entries, selectedCalendarIds);
+            events = calendarServiceHelper.getCalendarEventsByIds(service, selectedCalendarIds, today);
+            calendarServiceHelper.setSelectedCalendars(service, entries, selectedCalendarIds);
         }
         renderJson(response, today, events, entries);
     }

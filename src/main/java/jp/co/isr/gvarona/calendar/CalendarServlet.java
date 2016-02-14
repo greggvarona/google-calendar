@@ -20,6 +20,7 @@ import java.util.logging.Logger;
 
 /**
  * Redirects to the calendar view when authorization and consent is granted.
+ *
  */
 public class CalendarServlet extends AbstractAuthorizationCodeServlet {
 
@@ -58,68 +59,5 @@ public class CalendarServlet extends AbstractAuthorizationCodeServlet {
     protected void doRequest(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
         request.getRequestDispatcher("calendar.jsp").forward(request, response);
-    }
-
-    protected List<CalendarListEntry> getCalendarListEntries(Calendar service) throws IOException {
-        List<CalendarListEntry> items = new ArrayList<CalendarListEntry>();
-        String pageToken = null;
-
-        do {
-            CalendarList calendarList = service.calendarList().list().setPageToken(pageToken).execute();
-            items.addAll(calendarList.getItems());
-            pageToken = calendarList.getNextPageToken();
-        } while (pageToken != null);
-
-        return items;
-    }
-
-    protected List<Event> getCalendarEventsByIds(Calendar service, String[] selectedCalendarIds, Date start)
-            throws IOException {
-        // Iterate over the events in the specified calendar
-        String pageToken = null;
-        List<Event> eventsList = new ArrayList<Event>();
-        Date today = start;
-        Date twoWeeksAfter = DateUtils.add(today, 14);
-        DateTime minDateTime = new DateTime(today, TimeZone.getDefault());
-        DateTime maxDateTime = new DateTime(twoWeeksAfter, TimeZone.getDefault());
-
-        for (String calendarId : selectedCalendarIds) {
-            do {
-                Events events = service.events().list(calendarId)
-                        .setTimeMin(minDateTime)
-                        .setTimeMax(maxDateTime)
-                        .setPageToken(pageToken).execute();
-                eventsList.addAll(events.getItems());
-                pageToken = events.getNextPageToken();
-            } while (pageToken != null);
-        }
-        return eventsList;
-    }
-
-    protected List<Event> getCalendarEvents(Calendar service, List<CalendarListEntry> calendarListEntries, Date start)
-            throws IOException {
-        // Iterate over the events in the specified calendar
-        List<String> ids = new ArrayList<String>();
-
-        for (CalendarListEntry calendarListEntry : calendarListEntries) {
-            if(calendarListEntry.isSelected()) {
-                ids.add(calendarListEntry.getId());
-            }
-        }
-
-        return getCalendarEventsByIds(service, ids.toArray(new String[0]), start);
-    }
-
-    protected void setSelectedCalendars(Calendar service, List<CalendarListEntry> entries, String[] calendarIds) throws IOException {
-        List<String> calIds = Arrays.asList(calendarIds);
-
-        for(CalendarListEntry entry : entries) {
-            entry.setSelected(false);
-            if(calIds.contains(entry.getId())) {
-                entry.setSelected(true);
-            }
-            service.calendarList().update(entry.getId(), entry).execute();
-        }
-
     }
 }
