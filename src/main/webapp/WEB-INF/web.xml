@@ -33,7 +33,7 @@
 
     <servlet-mapping>
         <servlet-name>CalendarServletCallback</servlet-name>
-        <url-pattern>/calendar-callback</url-pattern>
+        <url-pattern>/auth-callback</url-pattern>
     </servlet-mapping>
 
 

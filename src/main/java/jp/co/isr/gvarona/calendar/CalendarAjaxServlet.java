@@ -27,16 +27,21 @@ public class CalendarAjaxServlet extends CalendarServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
-        doRequest(request, response);
+        List<Event> events = null;
+        Credential creds = getCredential();
+        Calendar service = new Calendar.Builder(AuthHelper.HTTP_TRANSPORT, AuthHelper.JSON_FACTORY, creds)
+                .setApplicationName(AuthHelper.APPLICATION_NAME).build();
+        List<CalendarListEntry> entries = this.getCalendarListEntries(service);
+        Date today = new Date();
+
+        logger.log(Level.INFO, "Processing all events in all calendars.");
+        events = this.getCalendarEvents(service, entries, today);
+
+        renderJson(response, today, events, entries);
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws IOException, ServletException {
-        doRequest(request, response);
-    }
-
-    protected void doPut(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
         List<Event> events = null;
         Credential creds = getCredential();
@@ -48,23 +53,8 @@ public class CalendarAjaxServlet extends CalendarServlet {
         if (selectedCalendarIds != null && selectedCalendarIds.length > 0) {
             logger.log(Level.INFO, "Processing events for selected calendars.");
             events = this.getCalendarEventsByIds(service, selectedCalendarIds, today);
-            this.setSelectedCalendars(entries, selectedCalendarIds);
+            this.setSelectedCalendars(service, entries, selectedCalendarIds);
         }
-        renderJson(response, today, events, entries);
-    }
-
-    protected void doRequest(HttpServletRequest request, HttpServletResponse response)
-            throws IOException, ServletException {
-        List<Event> events = null;
-        Credential creds = getCredential();
-        Calendar service = new Calendar.Builder(AuthHelper.HTTP_TRANSPORT, AuthHelper.JSON_FACTORY, creds)
-                .setApplicationName(AuthHelper.APPLICATION_NAME).build();
-        List<CalendarListEntry> entries = this.getCalendarListEntries(service);
-        Date today = new Date();
-
-        logger.log(Level.INFO, "Processing all events in all calendars.");
-        events = this.getCalendarEvents(service, entries, today);
-
         renderJson(response, today, events, entries);
     }
 

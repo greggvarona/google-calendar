@@ -14,6 +14,7 @@
   <meta charset="UTF-8"/>
   <link rel='stylesheet' href='${pageContext.request.contextPath}/assets/fullcalendar-2.6.0/fullcalendar.css' />
   <link rel='stylesheet' href='${pageContext.request.contextPath}/assets/bootstrap-3.1.1/bootstrap.min.css' />
+  <link rel='stylesheet' href='${pageContext.request.contextPath}/assets/app.css' />
   <script src='${pageContext.request.contextPath}/assets/fullcalendar-2.6.0/lib/jquery.min.js'></script>
   <script src='${pageContext.request.contextPath}/assets/fullcalendar-2.6.0/lib/moment.min.js'></script>
   <script src='${pageContext.request.contextPath}/assets/fullcalendar-2.6.0/fullcalendar.js'></script>
@@ -32,7 +33,7 @@
           <h2 class="panel-title">Calendar seleciton</h2>
         </div>
         <div class="panel-body">
-          <form id="calendar-selection">
+          <form id="calendar-selection" method="PUT" action="${pageContext.request.contextPath}/calendar">
             <button id="calendar-selection-btn" class="btn btn-default">Update Calendar</button>
           </form>
         </div>

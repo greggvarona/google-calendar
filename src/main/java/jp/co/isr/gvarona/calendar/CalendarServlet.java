@@ -93,7 +93,6 @@ public class CalendarServlet extends AbstractAuthorizationCodeServlet {
                 pageToken = events.getNextPageToken();
             } while (pageToken != null);
         }
-
         return eventsList;
     }
 
@@ -103,13 +102,15 @@ public class CalendarServlet extends AbstractAuthorizationCodeServlet {
         List<String> ids = new ArrayList<String>();
 
         for (CalendarListEntry calendarListEntry : calendarListEntries) {
-            ids.add(calendarListEntry.getId());
+            if(calendarListEntry.isSelected()) {
+                ids.add(calendarListEntry.getId());
+            }
         }
 
         return getCalendarEventsByIds(service, ids.toArray(new String[0]), start);
     }
 
-    protected void setSelectedCalendars(List<CalendarListEntry> entries, String[] calendarIds) {
+    protected void setSelectedCalendars(Calendar service, List<CalendarListEntry> entries, String[] calendarIds) throws IOException {
         List<String> calIds = Arrays.asList(calendarIds);
 
         for(CalendarListEntry entry : entries) {
@@ -117,6 +118,7 @@ public class CalendarServlet extends AbstractAuthorizationCodeServlet {
             if(calIds.contains(entry.getId())) {
                 entry.setSelected(true);
             }
+            service.calendarList().update(entry.getId(), entry).execute();
         }
 
     }

@@ -3,6 +3,7 @@
  */
 (function() {
     var events = [];
+    /* utility functions */
     var initEvents = function(events) {
         var arr = [];
         if(typeof events !== 'undefined' && events !== null) {
@@ -27,7 +28,7 @@
     var renderCalendarCheckbox = function(container, checkboxId, label, isSelected) {
         container.append(
             "<div class='checkbox'>" +
-            "<label><input type='checkbox' name='selectedCalendarIds'" + (isSelected ? "checked" : "" ) + " />" +
+            "<label><input id='" + checkboxId + "' type='checkbox' value='" + checkboxId + "' name='selectedCalendarIds'" + (isSelected ? "checked" : "" ) + " />" +
             label +
             "</label></div>"
         );
@@ -64,33 +65,43 @@
 
         window.open(url, "gmail_window");
     };
+    /* initialize full calendar */
     $('#calendar').fullCalendar({
-        buttonIcons: false,
-        header: { right: 'basicTwoWeeks,twoWeekAgenda'},
-        defaultView: 'basicTwoWeeks',
-        gotoDate: moment(),
+        header: { right: 'threeWeeksBasic,threeWeekAgenda'},
+        defaultView: 'threeWeeksBasic',
         views: {
-            basicTwoWeeks: {
+            threeWeeksBasic: {
                 type: 'basic',
-                duration: {weeks: 2},
-                buttonText: 'two weeks'
+                duration: {weeks: 3},
+                buttonText: 'normal'
             },
-            twoWeekAgenda: {
+            threeWeekAgenda: {
                 type: 'agenda',
-                duration: {weeks: 2},
+                duration: {weeks: 3},
                 buttonText: 'agenda'
             }
+        },
+        eventMouseover: function(event, jsEvent, view) {
+            $(this).append('<div id=\"'+event.id+'\" class=\"hover-end\" >'
+                + event.title + '<br/>' + event.description +
+                '</div>');
+        },
+        eventMouseout: function(event, jsEvent, view) {
+            $('#'+event.id).remove();
         },
         events: function(start, end, timezone, callback) {
             $.ajax({
                 url: ctx + '/calendar-ajax',
-                dataType: 'json',
                 success: function(doc) {
+                    //clearCelendarChoices();
                     if(typeof doc !== 'undefined' && doc !== null) {
                         events = initEvents(doc.events);
-                        renderCalendarChoices(doc.calendars);
+                        if ($("#calendar-selection .checkbox").length == 0) {
+                            renderCalendarChoices(doc.calendars);
+                        }
                     }
                     callback(events);
+                    $('#calendar').fullCalendar('defaultDate', moment());
                 },
                 error: function() {
                     alert("An error was encountered while fetching your calendar data.");
@@ -98,6 +109,7 @@
             });
         }
     });
+    /* UI events */
     $('#add-recepient').on('click', function () {
         var container = $("#recepients");
         renderRecepientInputGroup(container);
@@ -115,5 +127,23 @@
         data.subject = "Calendar";
         data.events = events;
         openGmail(data);
+    });
+    $('#calendar-selection-btn').on('click', function(e) {
+        e.preventDefault();
+
+        $.ajax({
+            url: ctx + '/calendar-ajax',
+            data: $("#calendar-selection").serializeArray(),
+            method: 'post',
+            beforeSend: function() {
+
+            },
+            success: function(doc) {
+                $('#calendar').fullCalendar('refetchEvents');
+            },
+            error: function() {
+                alert("An error was encountered while fetching your calendar data.");
+            }
+        });
     });
 }());

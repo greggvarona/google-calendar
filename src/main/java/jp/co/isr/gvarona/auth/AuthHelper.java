@@ -37,7 +37,7 @@ public class AuthHelper {
 
     /** Global instance of the scopes required by this quickstart. */
     public static final List<String> SCOPES =
-            Arrays.asList(CalendarScopes.CALENDAR_READONLY, GmailScopes.GMAIL_LABELS);
+            Arrays.asList(CalendarScopes.CALENDAR);
 
     /** Global instance of the HTTP transport. */
     public static HttpTransport HTTP_TRANSPORT;
